@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 import uvicorn, logging, os
+from routers.user.main import route as user_route
 import logging
 from initialisation import initialisation
 
@@ -11,7 +12,8 @@ app = FastAPI(title="Analytics API", version="1.0",
               openapi_url = f'{CONTEXT_PATH}/openapi.json'
 )
 
-# app.include_router(order_route, prefix=f'{CONTEXT_PATH}/api/v1',tags=["portfolio"])
+app.include_router(user_route, prefix=f'{CONTEXT_PATH}/api/v1')
+
 @app.get(f'{CONTEXT_PATH}/ping',tags=["Ping"])
 def ping():
     return {"message": "pong"}
