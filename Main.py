@@ -3,6 +3,10 @@ import uvicorn, logging, os
 from routers.user.main import route as user_route
 import logging
 from initialisation import initialisation
+from routers.content.main import route as content_route
+from routers.content.main import ai_route
+
+initialisation()
 
 CONTEXT_PATH= os.getenv("CONTEXT_PATH")
 
@@ -13,6 +17,9 @@ app = FastAPI(title="Analytics API", version="1.0",
 )
 
 app.include_router(user_route, prefix=f'{CONTEXT_PATH}/api/v1')
+
+app.include_router(content_route, prefix=f'{CONTEXT_PATH}/api/v1')
+app.include_router(ai_route, prefix=f'{CONTEXT_PATH}/api/v1')
 
 @app.get(f'{CONTEXT_PATH}/ping',tags=["Ping"])
 def ping():

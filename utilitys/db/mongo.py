@@ -23,6 +23,9 @@ class Mongo:
         else:
             result = coll.insert_one(data)
         return result
-    def find(self, query: dict, collection: str):
+    def find(self, query: dict, collection: str, removeId: bool = True):
         coll = self.mongo_db[collection]
-        return coll.find_one(query)
+        content= coll.find_one(query)
+        if '_id' in content and removeId:
+            content.pop('_id', None)
+        return content

@@ -11,12 +11,21 @@ from utilitys.email.email_utils import EmailUtils
 api = APIRouter(prefix="/signup")
 
 user_collection=os.getenv("USER_COLLECTION")
+CONTENT_COLLECTION= os.getenv("CONTENT_COLLECTION")
+
+@api.get("/verifydomain")
+def verify_domain(domain:str):
+    return not db_instance.find({"domain":domain}, user_collection) is None
 
 @api.post("/register")
 def register_user(data: SignupRequest):
     logging.debug(f'Signup request received: {data}')
-
-    if db_instance.find(query={"domain":data.email}, collection=user_collection) is None:
+    if verify_domain(data.domain[0]):
+        return JSONResponse(
+            status_code=status.HTTP_208_ALREADY_REPORTED,
+            content={"message": "Domain already exists"},
+        )
+    if db_instance.find(query={"email":data.email}, collection=user_collection) is None:
         # Initialize account settings if not provided
         if data.accountSettings is None:
             data.accountSettings = AccountSettings(isVerified=False, isBlocked=False,MFAEnabled=False, MFAConfigs=[])
@@ -34,6 +43,8 @@ def register_user(data: SignupRequest):
             "accountSettings": data.accountSettings.dict()
         }
         db_instance.save(user_data,user_collection,"email")
+        new_content={"domain":data.domain[0]}
+        db_instance.save(new_content,CONTENT_COLLECTION,"domain")
         email_util=EmailUtils()
         if email_util.generate_otp(data.email):
             return JSONResponse(
@@ -48,7 +59,7 @@ def register_user(data: SignupRequest):
     else:
         return JSONResponse(
             status_code=status.HTTP_208_ALREADY_REPORTED,
-            content={"message": "Domain already exists"},
+            content={"message": "Account already exists"},
         )
 @api.get("/resendotp")
 def resend_otp(email:str):
