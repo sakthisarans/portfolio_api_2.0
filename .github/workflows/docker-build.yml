@@ -27,4 +27,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: sakthisarans/portfolio_api_2.0:latest
+          tags: sakthisaran/portfolio_api_2.0:latest
